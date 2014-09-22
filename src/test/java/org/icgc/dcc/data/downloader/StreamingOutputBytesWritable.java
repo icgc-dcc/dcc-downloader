@@ -1,4 +1,4 @@
-package org.icgc.dcc.data.exporter.index;
+package org.icgc.dcc.data.downloader;
 
 import java.io.DataInput;
 import java.io.IOException;

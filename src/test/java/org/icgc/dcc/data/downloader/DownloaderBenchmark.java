@@ -39,7 +39,6 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.Text;
 import org.icgc.dcc.data.downloader.DynamicDownloader.DataType;
-import org.icgc.dcc.data.exporter.index.StreamingOutputBytesWritable;
 
 import com.google.caliper.Benchmark;
 import com.google.caliper.model.ArbitraryMeasurement;
