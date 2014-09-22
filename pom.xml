@@ -97,19 +97,6 @@
       </exclusions>
     </dependency>
 
-    <!-- SFTP -->
-    <dependency>
-      <groupId>org.apache.sshd</groupId>
-      <artifactId>sshd-core</artifactId>
-      <version>${mina.version}</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>slf4j-api</artifactId>
-          <groupId>org.slf4j</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
     <!-- Command line -->
     <dependency>
       <groupId>com.beust</groupId>
@@ -290,7 +277,6 @@
     <pig-cdh.version>0.10.1-${cdh.version}</pig-cdh.version>
     <hbase-cdh.version>0.92.1-${cdh.version}</hbase-cdh.version>
     <oozie-cdh.version>3.2.0-${cdh.version}</oozie-cdh.version>
-    <mina.version>0.8.0</mina.version>
     <mrunit.version>0.9.0-incubating</mrunit.version>
   </properties>
 </project>
