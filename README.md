@@ -1,4 +1,11 @@
-ICGC DCC - Downloader
+ICGC DCC - Data Downloader
 ===
 
-ICGC 2.0 - Downloader System
+Data Archive and Download component for DCC 
+
+Build
+---
+
+From the command line:
+
+	mvn package
