@@ -7,28 +7,8 @@
   </formats>
   <fileSets>
     <fileSet>
-      <directory>src/main/exporter/bin</directory>
-      <outputDirectory>exporter/bin</outputDirectory>
-      <fileMode>0755</fileMode>
-    </fileSet>
-    <fileSet>
-      <directory>src/main/exporter/conf</directory>
-      <outputDirectory>exporter/conf</outputDirectory>
-    </fileSet>
-    <fileSet>
-      <directory>src/main/exporter/scripts</directory>
-      <outputDirectory>exporter/scripts</outputDirectory>
-    </fileSet>
-    <fileSet>
       <directory>src/main/resources/workflows</directory>
       <outputDirectory>workflows</outputDirectory>
-    </fileSet>
-    <fileSet>
-      <directory>src/main/exporter/logs</directory>
-      <outputDirectory>exporter/logs</outputDirectory>
-      <excludes>
-        <exclude>**/*</exclude>
-      </excludes>
     </fileSet>
     <fileSet>
       <directory>src/main/IntegrationTest</directory>
@@ -36,11 +16,6 @@
     </fileSet>
   </fileSets>
   <files>
-    <file>
-      <source>${project.build.directory}/${artifactId}-${version}-all.jar</source>
-      <outputDirectory>exporter/lib</outputDirectory>
-      <destName>${artifactId}.jar</destName>
-    </file>
     <file>
       <source>${project.build.directory}/${artifactId}-${version}-all.jar</source>
       <outputDirectory>workflows/archive/lib</outputDirectory>
