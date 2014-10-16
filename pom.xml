@@ -4,10 +4,10 @@
   <parent>
     <groupId>org.icgc.dcc</groupId>
     <artifactId>dcc-parent</artifactId>
-    <version>1</version>
+    <version>3</version>
   </parent>
   <artifactId>dcc-downloader</artifactId>
-  
+
   <repositories>
     <!-- DCC -->
     <repository>
@@ -15,13 +15,13 @@
       <url>http://seqwaremaven.oicr.on.ca/artifactory/dcc-release</url>
     </repository>
   </repositories>
-  
+
   <dependencies>
     <!-- TODO: Shade relocate: https://maven.apache.org/plugins/maven-shade-plugin/examples/class-relocation.html -->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>14.0.1</version><!--$NO-MVN-MAN-VER$-->
+      <version>14.0.1</version><!--$NO-MVN-MAN-VER$ -->
     </dependency>
 
     <!-- Hadoop -->
@@ -233,6 +233,21 @@
         </configuration>
       </plugin>
 
+      <!-- Include source -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>${source.plugin.version}</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
@@ -273,10 +288,13 @@
   </build>
 
   <properties>
-    <!-- Versions -->
+    <!-- Versions - Hadoop -->
     <pig-cdh.version>0.10.1-${cdh.version}</pig-cdh.version>
     <hbase-cdh.version>0.92.1-${cdh.version}</hbase-cdh.version>
     <oozie-cdh.version>3.2.0-${cdh.version}</oozie-cdh.version>
     <mrunit.version>0.9.0-incubating</mrunit.version>
+    
+    <!-- Versions - Plugins -->
+    <source.plugin.version>2.3</source.plugin.version>
   </properties>
 </project>

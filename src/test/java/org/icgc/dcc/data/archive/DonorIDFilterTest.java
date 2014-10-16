@@ -17,14 +17,14 @@
  */
 package org.icgc.dcc.data.archive;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.data.archive.ArchiverConstant.DATA_CONTENT_FAMILY;
 import static org.mockito.Mockito.mock;
 
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.fest.assertions.core.Condition;
+import org.assertj.core.api.Condition;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableSet;

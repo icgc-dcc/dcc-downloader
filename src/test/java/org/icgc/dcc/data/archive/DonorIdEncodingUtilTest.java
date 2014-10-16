@@ -17,7 +17,7 @@
  */
 package org.icgc.dcc.data.archive;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Random;

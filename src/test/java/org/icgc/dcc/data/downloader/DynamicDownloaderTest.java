@@ -17,7 +17,7 @@
  */
 package org.icgc.dcc.data.downloader;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
@@ -148,7 +148,6 @@ public class DynamicDownloaderTest {
     SchemaUtil.createArchiveTable(conf, false);
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testSubmitJob() throws IOException, OozieClientException {
     String downloadTestId = "DOWNLOAD_ID";
