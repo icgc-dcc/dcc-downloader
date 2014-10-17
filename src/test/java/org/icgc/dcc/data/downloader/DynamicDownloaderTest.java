@@ -188,7 +188,7 @@ public class DynamicDownloaderTest {
 
     assertThat(downloadTestId).isEqualTo(expectedDownloadId);
     assertThat(actualJobContext.getDownloadId()).isEqualTo(expectedDownloadId);
-    assertThat(actualJobContext.getDataTypes()).isIn(ImmutableList.<DataType> of(DataType.SSM_OPEN, DataType.CLINICAL));
+    assertThat(actualJobContext.getDataTypes()).containsOnly(DataType.SSM_OPEN, DataType.CLINICAL);
 
     assertThat(actualJobContext.getFilterTypeInfo()).containsAll(expectedFilterTypeInfo);
     assertThat(actualJobContext.getJobInfo()).isEqualTo(expectedJobInfo);
