@@ -22,6 +22,11 @@
       <destName>${artifactId}.jar</destName>
     </file>
     <file>
+      <source>${project.build.directory}/${artifactId}-${version}-all.jar</source>
+      <outputDirectory>workflows/archivecleaner/lib</outputDirectory>
+      <destName>${artifactId}.jar</destName>
+    </file>
+    <file>
       <source>${project.build.directory}/${artifactId}-${version}.jar</source>
       <outputDirectory>hbase-lib</outputDirectory>
       <destName>filter.jar</destName>
