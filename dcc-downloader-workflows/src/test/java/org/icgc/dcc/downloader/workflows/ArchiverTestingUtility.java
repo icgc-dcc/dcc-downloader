@@ -31,10 +31,10 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.icgc.dcc.downloader.core.ArchiveMetaManager;
 import org.icgc.dcc.downloader.core.ArchiverConstant;
 import org.icgc.dcc.downloader.core.DataType;
 import org.icgc.dcc.downloader.core.SchemaUtil;
-import org.icgc.dcc.downloader.workflows.ArchiveMetaManager;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;

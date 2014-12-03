@@ -56,6 +56,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.icgc.dcc.downloader.core.ArchiveMetaManager;
 import org.icgc.dcc.downloader.core.ArchiverConstant;
 import org.icgc.dcc.downloader.core.DonorIdEncodingUtil;
 import org.icgc.dcc.downloader.core.SchemaUtil;
