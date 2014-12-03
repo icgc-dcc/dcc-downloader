@@ -1,7 +1,0 @@
-package downloader;
-
-option java_package = "org.icgc.dcc.data.archive";
-option java_outer_classname = "ArchiveProto";
-message DonorSelection {
-	repeated uint32 id = 1 [packed=true];
-}
