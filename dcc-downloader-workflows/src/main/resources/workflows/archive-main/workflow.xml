@@ -1,0 +1,600 @@
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor 
+  license agreements. See the NOTICE file distributed with this work for additional 
+  information regarding copyright ownership. The ASF licenses this file to 
+  you under the Apache License, Version 2.0 (the "License"); you may not use 
+  this file except in compliance with the License. You may obtain a copy of 
+  the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required 
+  by applicable law or agreed to in writing, software distributed under the 
+  License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
+  OF ANY KIND, either express or implied. See the License for the specific 
+  language governing permissions and limitations under the License. -->
+<workflow-app xmlns="uri:oozie:workflow:0.4" name="archive-generation-main">
+  <global>
+    <configuration>
+      <property>
+        <name>encodedDonorIds</name>
+        <value>${encodedDonorIds}</value>
+      </property>
+      <property>
+        <name>downloadId</name>
+        <value>${downloadId}</value>
+      </property>
+      <property>
+        <name>releaseName</name>
+        <value>${releaseName}</value>
+      </property>
+    </configuration>
+  </global>
+
+  <start to="summaryEmail" />
+
+  <action name="summaryEmail">
+    <email xmlns="uri:oozie:email-action:0.1">
+      <to>${userEmailAddress}</to>
+      <subject>ICGC Portal Notification: Data Download Request</subject>
+      <body>
+Thanks for using the ICGC Data Portal. Your data download request is currently being processed.
+
+You will be notified by email when your data files are ready to download. You can track the progress of your request at ${statusUrl}
+
+The ICGC DCC team
+      </body>
+    </email>
+    <ok to="forking" />
+    <error to="forking" />
+  </action>
+  <fork name="forking">
+    <path start="ssm_open" />
+    <path start="cnsm" />
+    <path start="clinical" />
+    <path start="clinicalsample" />
+    <path start="jcn" />
+    <path start="mirna" />
+    <path start="mirna_seq" />
+    <path start="pexp" />
+    <path start="stsm" />
+    <path start="exp" />
+    <path start="meth" />
+    <path start="exp_seq" />
+    <path start="exp_array" />
+    <path start="meth_seq" />
+    <path start="meth_array" />
+    <path start="ssm_controlled" />
+    <path start="sgv_controlled" />
+  </fork>
+  <!-- mirna_seq -->
+  <decision name="mirna_seq">
+    <switch>
+      <case to="mirna_seq_archive">
+        ${mirna_seq}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="mirna_seq_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>mirna_seq</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/mirna_seq</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+  <!-- exp_seq -->
+  <decision name="exp_seq">
+    <switch>
+      <case to="exp_seq_archive">
+        ${exp_seq}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="exp_seq_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>exp_seq</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/exp_seq</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+  <!-- exp_array -->
+  <decision name="exp_array">
+    <switch>
+      <case to="exp_array_archive">
+        ${exp_array}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="exp_array_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>exp_array</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/exp_array</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+  <!-- meth_seq -->
+  <decision name="meth_seq">
+    <switch>
+      <case to="meth_seq_archive">
+        ${meth_seq}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="meth_seq_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>meth_seq</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/meth_seq</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+  <!-- meth_array -->
+  <decision name="meth_array">
+    <switch>
+      <case to="meth_array_archive">
+        ${meth_array}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="meth_array_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>meth_array</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/meth_array</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+  <!-- sgv_controlled -->
+  <decision name="sgv_controlled">
+    <switch>
+      <case to="sgv_controlled_archive">
+        ${sgv_controlled}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="sgv_controlled_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>sgv_controlled</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/sgv_controlled</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+  <!-- ssm_controlled -->
+  <decision name="ssm_controlled">
+    <switch>
+      <case to="ssm_controlled_archive">
+        ${ssm_controlled}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="ssm_controlled_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>ssm_controlled</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/ssm_controlled</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+  <!-- meth -->
+  <decision name="meth">
+    <switch>
+      <case to="meth_archive">
+        ${meth}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="meth_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>meth</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/meth</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+  <!-- exp -->
+  <decision name="exp">
+    <switch>
+      <case to="exp_archive">
+        ${exp}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="exp_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>exp</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/exp</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+  <!-- stsm -->
+  <decision name="stsm">
+    <switch>
+      <case to="stsm_archive">
+        ${stsm}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="stsm_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>stsm</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/stsm</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+  <!-- pexp -->
+  <decision name="pexp">
+    <switch>
+      <case to="pexp_archive">
+        ${pexp}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="pexp_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>pexp</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/pexp</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+  <!-- mirna -->
+  <decision name="mirna">
+    <switch>
+      <case to="mirna_archive">
+        ${mirna}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="mirna_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>mirna</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/mirna</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+  <!-- jcn -->
+  <decision name="jcn">
+    <switch>
+      <case to="jcn_archive">
+        ${jcn}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="jcn_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>jcn</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/jcn</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+  <!-- clinicalsample -->
+  <decision name="clinicalsample">
+    <switch>
+      <case to="clinicalsample_archive">
+        ${clinicalsample}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="clinicalsample_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>clinicalsample</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/clinicalsample</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+  <!-- clinical -->
+  <decision name="clinical">
+    <switch>
+      <case to="clinical_archive">
+        ${clinical}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="clinical_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>clinical</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/clinical</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+  <!-- cnsm -->
+  <decision name="cnsm">
+    <switch>
+      <case to="cnsm_archive">
+        ${cnsm}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="cnsm_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>cnsm</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/cnsm</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+  <!-- ssm_open -->
+  <decision name="ssm_open">
+    <switch>
+      <case to="ssm_open_archive">
+        ${ssm_open}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="ssm_open_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>ssm_open</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/ssm_open</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+
+  <join name="joining" to="successEmail" />
+
+  <!-- Oozie Bug: https://issues.apache.org/jira/browse/OOZIE-1142 -->
+  <decision name="hack_error">
+    <switch>
+      <case to="errorEmail">
+        true
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+
+  <action name="errorEmail">
+    <email xmlns="uri:oozie:email-action:0.1">
+      <to>${userEmailAddress}</to>
+      <subject>ICGC Portal Notification: Data Download Request Failed
+      </subject>
+      <body>
+Sorry, we encountered an error when creating your data download files.
+Please try again or contact dcc-support@icgc.org for assistance.
+
+The ICGC DCC team
+      </body>
+    </email>
+    <ok to="errorEmailAdmin" />
+    <error to="errorEmailAdmin" />
+  </action>
+
+  <action name="errorEmailAdmin">
+    <email xmlns="uri:oozie:email-action:0.1">
+      <to>${supportEmailAddress}</to>
+      <subject>Download Failure: ${statusUrl}
+      </subject>
+      <body>
+      </body>
+    </email>
+    <ok to="killDueToError" />
+    <error to="killDueToError" />
+  </action>
+
+  <action name="successEmail">
+    <email xmlns="uri:oozie:email-action:0.1">
+      <to>${userEmailAddress}</to>
+      <subject>ICGC Portal Notification: Data Download Request Succeeded
+      </subject>
+      <body>
+Your data download request has been successfully processed.
+Please download your data file(s) within ${ttl} hours at ${statusUrl}
+
+Thanks for using the ICGC Data Portal.
+
+The ICGC DCC team
+      </body>
+    </email>
+    <ok to="successEmailAdmin" />
+    <error to="successEmailAdmin" />
+  </action>
+
+  <action name="successEmailAdmin">
+    <email xmlns="uri:oozie:email-action:0.1">
+      <to>${supportEmailAddress}</to>
+      <subject>Download Success: ${statusUrl}
+      </subject>
+      <body>
+      </body>
+    </email>
+    <ok to="end" />
+    <error to="end" />
+  </action>
+  
+  <kill name="killDueToError">
+    <message>The job fails with the error
+      message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+  </kill>
+  <end name='end' />
+</workflow-app>
