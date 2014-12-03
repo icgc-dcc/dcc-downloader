@@ -27,7 +27,7 @@
                     <value>${queueName}</value>
                 </property>
             </configuration>
-            <main-class>org.icgc.dcc.data.archive.Archiver</main-class>
+            <main-class>org.icgc.dcc.downloader.workflows.Archiver</main-class>
             <arg> -D </arg> 
             <arg> archive.data.type=${dataType} </arg>
             <arg> -D </arg>

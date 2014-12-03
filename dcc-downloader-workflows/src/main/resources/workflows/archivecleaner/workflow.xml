@@ -21,7 +21,7 @@
         <java>
         <job-tracker>${jobTracker}</job-tracker>
         <name-node>${nameNode}</name-node>
-            <main-class>org.icgc.dcc.data.archive.ArchiveExpunger</main-class>
+            <main-class>org.icgc.dcc.downloader.workflows.ArchiveExpunger</main-class>
             <arg>${downloadDir}</arg>
             <arg>${zookeeperQuorum}</arg>
         </java>
