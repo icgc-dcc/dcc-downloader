@@ -175,7 +175,7 @@ public class ExportedDataFileSystem {
   }
 
   private Path getDownloadPath(File relativePath) {
-    relativePath = new File(releaseSymlink.resolveSymlink(relativePath.getPath()));
+    relativePath = new File(SEPARATOR,releaseSymlink.resolveSymlink(relativePath.getPath()));
     String pathStr = relativePath.getPath();
     if (SEPARATOR.charAt(0) == pathStr.charAt(0)) pathStr = pathStr.substring(1);
     if (pathStr.equals("")) pathStr = CURRENT_DIRECTORY;
