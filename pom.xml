@@ -2,10 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
+   <parent>
     <groupId>org.icgc.dcc</groupId>
     <artifactId>dcc-parent</artifactId>
-    <version>8</version>
+    <version>12-SNAPSHOT</version>
+    <relativePath>../dcc-parent/pom.xml</relativePath>
   </parent>
 
   <artifactId>dcc-downloader</artifactId>
@@ -70,7 +71,7 @@
     <!-- HBase -->
     <dependency>
       <groupId>org.apache.hbase</groupId>
-      <artifactId>hbase</artifactId>
+      <artifactId>hbase-client</artifactId>
       <version>${hbase-cdh.version}</version>
       <exclusions>
         <exclusion>
@@ -115,7 +116,7 @@
     <!-- Testing - HBase -->
     <dependency>
       <groupId>org.apache.hbase</groupId>
-      <artifactId>hbase</artifactId>
+      <artifactId>hbase-testing-util</artifactId>
       <version>${hbase-cdh.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
@@ -173,7 +174,7 @@
 
   <properties>
     <!-- Versions - Hadoop -->
-    <hbase-cdh.version>0.92.1-${cdh.version}</hbase-cdh.version>
-    <oozie-cdh.version>3.2.0-${cdh.version}</oozie-cdh.version>
+    <hbase-cdh.version>0.98.6-${cdh.version}</hbase-cdh.version>
+    <oozie-cdh.version>4.0.0-${cdh.version}</oozie-cdh.version>
   </properties>
 </project>
