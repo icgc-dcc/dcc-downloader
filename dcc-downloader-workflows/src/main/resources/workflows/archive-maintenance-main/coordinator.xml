@@ -1,0 +1,7 @@
+<coordinator-app xmlns="uri:oozie:coordinator:0.2" name="coord-archive-maintenance" frequency="${coord:days(1)}" start="${jobStart}" end="${jobEnd}" timezone="UTC"> 
+  <action>
+    <workflow>
+      <app-path>${nameNode}/user/downloader/workflows/archive-maintenance</app-path>
+    </workflow>
+  </action>
+</coordinator-app>
