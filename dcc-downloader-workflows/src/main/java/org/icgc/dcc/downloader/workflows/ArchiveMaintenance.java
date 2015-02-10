@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.TableNotFoundException;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.regionserver.compactions.CompactionRequest.CompactionState;
 import org.icgc.dcc.downloader.core.DataType;
@@ -49,10 +50,14 @@ public class ArchiveMaintenance {
 				String tableName = SchemaUtil.getDataTableName(
 						dataType.indexName, releaseName);
 				log.info("Table maintenannce for: {}", tableName);
+				try {
 				admin.majorCompact(tableName);
 				do {
 					TimeUnit.MINUTES.sleep(2);
 				} while (admin.getCompactionState(tableName) != CompactionState.NONE);
+				} catch (TableNotFoundException e) {
+					log.warn("Skipping table {}", tableName);
+				}
 
 			}
 		} catch (Exception e) {
