@@ -23,7 +23,7 @@ import static org.icgc.dcc.downloader.core.ArchiverConstant.ARCHIVE_TTL_COLUMN;
 import java.io.IOException;
 import java.util.Map;
 
-import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -38,7 +38,7 @@ import com.google.common.collect.ImmutableSet;
 /**
  * Cleans out dynamic download archives
  */
-@Log4j
+@Slf4j
 public class ArchiveExpunger {
 
   private final Path dynamicDownloadPath;
