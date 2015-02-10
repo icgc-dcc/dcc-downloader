@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.regionserver.compactions.CompactionRequest.CompactionState;
+import org.apache.hadoop.hbase.protobuf.generated.AdminProtos.GetRegionInfoResponse.CompactionState;
 import org.icgc.dcc.downloader.core.DataType;
 import org.icgc.dcc.downloader.core.SchemaUtil;
 
