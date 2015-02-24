@@ -25,7 +25,7 @@ import java.util.Random;
 import java.util.Set;
 
 import lombok.Data;
-import lombok.experimental.Builder;
+import lombok.Builder;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.hadoop.hbase.client.HTable;
