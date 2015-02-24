@@ -1,6 +1,8 @@
 package org.icgc.dcc.downloader.client;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,15 +10,16 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class ExportedDataFileSystemTest {
 	private static ExportedDataFileSystem fs;
+
 	@BeforeClass
 	public static void setup() throws IOException {
-		URL resource = ExportedDataFileSystem.class.getClassLoader().getResource("data");
+		URL resource = ExportedDataFileSystem.class.getClassLoader()
+				.getResource("data");
 		System.out.println(resource.getFile());
 		fs = new ExportedDataFileSystem(resource.getFile());
 	}
@@ -36,7 +39,7 @@ public class ExportedDataFileSystemTest {
 		byte[] data = new byte[(int) length];
 		is.read(data);
 		is.close();
-		 assertEquals("test", new String(data, "UTF-8"));
+		assertEquals("test", new String(data, "UTF-8"));
 	}
 
 	@Test
@@ -49,8 +52,8 @@ public class ExportedDataFileSystemTest {
 	@Test
 	public void testListFiles() throws IOException {
 		List<File> files = fs.listFiles(new File("/project"));
-		assertEquals(1,files.size());
-		assertEquals("testfile.txt",files.get(0).getName());
+		assertEquals(1, files.size());
+		assertEquals("testfile.txt", files.get(0).getName());
 	}
 
 	@Test
