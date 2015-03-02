@@ -32,7 +32,7 @@
       <destName>${artifactId}.jar</destName>
     </file>
     <file>
-      <source>${project.build.directory}/${artifactId}-${version}.jar</source>
+      <source>${project.build.directory}/${artifactId}-${version}-all.jar</source>
       <outputDirectory>hbase-lib</outputDirectory>
       <destName>filter.jar</destName>
     </file>
