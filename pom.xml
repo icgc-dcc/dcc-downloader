@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.icgc.dcc</groupId>
     <artifactId>dcc-parent</artifactId>
-    <version>11</version>
+    <version>12</version>
   </parent>
 
   <artifactId>dcc-downloader</artifactId>
@@ -179,7 +179,7 @@
       <groupId>org.slf4j</groupId>
       <artifactId>log4j-over-slf4j</artifactId>
       <version>${slf4j.version}</version>
-    </dependency>  
+    </dependency>
   </dependencies>
 
   <build>
