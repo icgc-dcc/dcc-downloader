@@ -17,8 +17,6 @@
  */
 package org.icgc.dcc.downloader.workflows;
 
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.NavigableSet;
@@ -26,8 +24,10 @@ import java.util.TreeSet;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.exceptions.DeserializationException;
 import org.apache.hadoop.hbase.filter.FilterBase;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.icgc.dcc.downloader.core.ArchiverConstant;
@@ -60,7 +60,7 @@ public class DonorIDFilter extends FilterBase {
   }
 
   @Override
-  public ReturnCode filterKeyValue(KeyValue v) {
+  public ReturnCode filterKeyValue(Cell v) {
     // filtering out this row meaning all rows associated with the current donor id
     if (this.filterOutRow) {
       return ReturnCode.SEEK_NEXT_USING_HINT;
@@ -130,15 +130,16 @@ public class DonorIDFilter extends FilterBase {
     this.filterOutRow = false;
   }
 
-  @Override
-  public void readFields(DataInput in) throws IOException {
-    this.encodedIds = Bytes.readByteArray(in);
-    initializeDonorId();
-  }
+  public static DonorIDFilter parseFrom(final byte[] bytes) throws DeserializationException {
+	    DonorIDFilter filter = new DonorIDFilter();
+	    filter.encodedIds = bytes;
+	    filter.initializeDonorId();
+	    return filter;
+	  }
 
   @Override
-  public void write(DataOutput out) throws IOException {
-    Bytes.writeByteArray(out, this.encodedIds);
+  public byte[] toByteArray() throws IOException {
+	  return this.encodedIds;
   }
 
   private void initializeDonorId() {

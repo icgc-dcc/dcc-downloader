@@ -15,7 +15,7 @@ import java.util.Properties;
 
 import lombok.Data;
 import lombok.val;
-import lombok.experimental.Builder;
+import lombok.Builder;
 
 import org.apache.oozie.client.OozieClient;
 import org.apache.oozie.client.OozieClientException;
