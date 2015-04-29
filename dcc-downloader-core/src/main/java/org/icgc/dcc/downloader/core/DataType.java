@@ -7,6 +7,14 @@ public enum DataType {
     SSM_OPEN("ssm", "ssm_open", false),
     CLINICALSAMPLE("clinicalsample", "clinicalsample", false),
     CLINICAL("clinical", "clinical", false),
+
+    DONOR("donor", "donor", false),
+    DONOR_FAMILY("donor_family", "donor_family", false),
+    DONOR_THERAPY("donor_therapy", "donor_therapy", false),
+    DONOR_EXPOSURE("donor_exposure", "donor_exposure", false),
+    SPECIMEN("specimen", "specimen", false),
+    SAMPLE("sample", "sample", false),
+
     CNSM("cnsm", "cnsm", false),
     JCN("jcn", "jcn", false),
     METH_SEQ("meth_seq", "meth_seq", false),

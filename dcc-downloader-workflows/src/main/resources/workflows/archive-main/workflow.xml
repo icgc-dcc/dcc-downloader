@@ -44,6 +44,14 @@ The ICGC DCC team
     <error to="forking" />
   </action>
   <fork name="forking">
+
+    <path start="donor" />
+    <path start="donor_family" />
+    <path start="donor_exposure" />
+    <path start="donor_therapy" />
+    <path start="specimen" />
+    <path start="sample" />
+
     <path start="ssm_open" />
     <path start="cnsm" />
     <path start="clinical" />
@@ -62,6 +70,175 @@ The ICGC DCC team
     <path start="ssm_controlled" />
     <path start="sgv_controlled" />
   </fork>
+  
+    <!-- donor -->
+  <decision name="donor">
+    <switch>
+      <case to="donor_archive">
+        ${donor}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="donor_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>donor</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/donor</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+
+  <!-- donor_family -->
+  <decision name="donor_family">
+    <switch>
+      <case to="donor_family_archive">
+        ${donor_family}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="donor_family_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>donor_family</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/donor_family</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+
+  <!-- donor_exposure -->
+  <decision name="donor_exposure">
+    <switch>
+      <case to="donor_exposure_archive">
+        ${donor_exposure}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="donor_exposure_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>donor_exposure</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/donor_exposure</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+
+  <!-- donor_therapy -->
+  <decision name="donor_therapy">
+    <switch>
+      <case to="donor_therapy_archive">
+        ${donor_therapy}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="donor_therapy_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>donor_therapy</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/donor_therapy</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+
+  <!-- specimen -->
+  <decision name="specimen">
+    <switch>
+      <case to="specimen_archive">
+        ${specimen}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="specimen_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>specimen</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/specimen</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+
+  <!-- sample -->
+  <decision name="sample">
+    <switch>
+      <case to="sample_archive">
+        ${sample}
+      </case>
+      <default to="joining" />
+    </switch>
+  </decision>
+  <action name="sample_archive">
+    <sub-workflow>
+      <app-path>${nameNode}${archiveAppPath}</app-path>
+      <propagate-configuration />
+      <configuration>
+        <property>
+          <name>dataType</name>
+          <value>sample</value>
+        </property>
+        <property>
+          <name>outputDir</name>
+          <value>${outputDir}/sample</value>
+        </property>
+      </configuration>
+    </sub-workflow>
+    <ok to="joining" />
+    <error to="hack_error" />
+  </action>
+  
   <!-- mirna_seq -->
   <decision name="mirna_seq">
     <switch>
