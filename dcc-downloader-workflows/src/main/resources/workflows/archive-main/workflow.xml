@@ -44,7 +44,6 @@ The ICGC DCC team
     <error to="forking" />
   </action>
   <fork name="forking">
-
     <path start="donor" />
     <path start="donor_family" />
     <path start="donor_exposure" />
