@@ -155,6 +155,14 @@ public class ArchiveMetaManager {
     metaTable.put(metaPut);
   }
 
+  public void addHeader(String dataType, String[] headers) throws IOException {
+    Put metaPut = new Put(Bytes.toBytes(dataType));
+    if (headers != null) {
+      metaPut.add(META_TYPE_INFO_FAMILY, META_TYPE_HEADER, SchemaUtil.encodeHeader(headers));
+    }
+    metaTable.put(metaPut);
+  }
+
   public List<String> getHeader(String dataType) throws IOException {
     Builder<String> builder = ImmutableList.builder();
 
