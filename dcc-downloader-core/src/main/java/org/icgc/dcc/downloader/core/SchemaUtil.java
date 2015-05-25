@@ -44,6 +44,7 @@ import static org.icgc.dcc.downloader.core.ArchiverConstant.TABLENAME_SEPARATOR;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,8 +62,10 @@ import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableExistsException;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.io.compress.Compression.Algorithm;
+import org.apache.hadoop.hbase.io.encoding.DataBlockEncoding;
 import org.apache.hadoop.hbase.regionserver.BloomType;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.HBaseFsck;
@@ -70,6 +73,8 @@ import org.icgc.dcc.downloader.core.ArchiveJobManager.JobProgress;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
@@ -115,24 +120,36 @@ public final class SchemaUtil {
 		try {
 			if (!admin.tableExists(tablename)) {
 				byte[][] splits = new byte[boundaries.size()][];
-				HTableDescriptor descriptor = new HTableDescriptor(tablename);
-				HColumnDescriptor dataSchema = new HColumnDescriptor(
-						DATA_CONTENT_FAMILY);
-				dataSchema.setBlockCacheEnabled(false);
-				dataSchema.setBlocksize(DATA_BLOCK_SIZE);
-				dataSchema.setBloomFilterType(BloomType.ROW);
-				if (withSnappyCompression)
-					dataSchema.setCompressionType(Algorithm.SNAPPY);
-				dataSchema.setMaxVersions(1);
-				descriptor.addFamily(dataSchema);
-				descriptor.setMaxFileSize(MAX_DATA_FILE_SIZE);
-				admin.createTable(descriptor, boundaries.toArray(splits));
+				admin.createTable(
+						getDataTableSchema(tablename, withSnappyCompression),
+						boundaries.toArray(splits));
 			}
 		} catch (TableExistsException e) {
 			log.warn("already created... (skip)", e);
 		} finally {
 			admin.close();
 		}
+	}
+
+	public static HTableDescriptor getDataTableSchema(String tablename) {
+		return getDataTableSchema(tablename, true);
+	}
+
+	public static HTableDescriptor getDataTableSchema(String tablename,
+			boolean withSnappyCompression) {
+		HTableDescriptor descriptor = new HTableDescriptor(TableName.valueOf(tablename));
+		HColumnDescriptor dataSchema = new HColumnDescriptor(
+				DATA_CONTENT_FAMILY);
+		dataSchema.setBlockCacheEnabled(false);
+		dataSchema.setBlocksize(DATA_BLOCK_SIZE);
+		dataSchema.setBloomFilterType(BloomType.ROW);
+		dataSchema.setDataBlockEncoding(DataBlockEncoding.PREFIX);
+		if (withSnappyCompression)
+			dataSchema.setCompressionType(Algorithm.SNAPPY);
+		dataSchema.setMaxVersions(1);
+		descriptor.addFamily(dataSchema);
+		descriptor.setMaxFileSize(MAX_DATA_FILE_SIZE);
+		return descriptor;
 	}
 
 	public static int extractId(String donorId) {
@@ -183,7 +200,7 @@ public final class SchemaUtil {
 		HBaseAdmin admin = new HBaseAdmin(conf);
 		try {
 			if (!admin.tableExists(tablename)) {
-				HTableDescriptor descriptor = new HTableDescriptor(tablename);
+				HTableDescriptor descriptor = new HTableDescriptor(TableName.valueOf(tablename));
 				HColumnDescriptor dataTypeSchema = new HColumnDescriptor(
 						META_TYPE_INFO_FAMILY);
 				dataTypeSchema.setBlockCacheEnabled(true);
@@ -205,14 +222,25 @@ public final class SchemaUtil {
 					dataSizeSchema.setCompressionType(Algorithm.SNAPPY);
 				dataSizeSchema.setMaxVersions(1);
 				descriptor.addFamily(dataSizeSchema);
-
-				admin.createTable(descriptor);
+				
+				admin.createTable(descriptor, metaSplitKeys());
 			}
 		} catch (TableExistsException e) {
 			log.warn("It has been created.", e);
 		} finally {
 			admin.close();
 		}
+	}
+
+	private static byte[][] metaSplitKeys() {
+		byte[][] splitKeys = new byte[DataType.values().length][];
+		int i =0;
+		for(DataType type : DataType.values()) {
+			splitKeys[i] = Bytes.toBytes(type.indexName);
+			++i;
+		}
+		Arrays.sort(splitKeys, new Bytes.ByteArrayComparator());
+		return Arrays.copyOfRange(splitKeys, 1, splitKeys.length);
 	}
 
 	public static String getMetaTableName(String releaseName) {
@@ -317,7 +345,7 @@ public final class SchemaUtil {
 
 	public static HTableDescriptor getArchiveHTableDescriptor(
 			boolean withCompression) {
-		HTableDescriptor descriptor = new HTableDescriptor(ARCHIVE_TABLE_NAME);
+		HTableDescriptor descriptor = new HTableDescriptor(TableName.valueOf(ARCHIVE_TABLE_NAME));
 		HColumnDescriptor activeJobSchema = new HColumnDescriptor(
 				ARCHIVE_ACTIVE_JOB_FAMILY);
 		activeJobSchema.setBlockCacheEnabled(false);
