@@ -107,4 +107,28 @@
     <name>exp_seq</name>
     <value>false</value>
   </property>
+    <property>
+    <name>donor</name>
+    <value>false</value>
+  </property>
+  <property>
+    <name>donor_family</name>
+    <value>false</value>
+  </property>
+  <property>
+    <name>donor_therapy</name>
+    <value>false</value>
+  </property>
+  <property>
+    <name>donor_exposure</name>
+    <value>false</value>
+  </property>
+  <property>
+    <name>sample</name>
+    <value>false</value>
+  </property>
+  <property>
+    <name>specimen</name>
+    <value>false</value>
+  </property>
 </configuration>
