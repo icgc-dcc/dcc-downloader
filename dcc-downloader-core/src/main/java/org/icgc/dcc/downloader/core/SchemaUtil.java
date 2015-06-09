@@ -137,7 +137,8 @@ public final class SchemaUtil {
 
 	public static HTableDescriptor getDataTableSchema(String tablename,
 			boolean withSnappyCompression) {
-		HTableDescriptor descriptor = new HTableDescriptor(TableName.valueOf(tablename));
+		HTableDescriptor descriptor = new HTableDescriptor(
+				TableName.valueOf(tablename));
 		HColumnDescriptor dataSchema = new HColumnDescriptor(
 				DATA_CONTENT_FAMILY);
 		dataSchema.setBlockCacheEnabled(false);
@@ -200,7 +201,8 @@ public final class SchemaUtil {
 		HBaseAdmin admin = new HBaseAdmin(conf);
 		try {
 			if (!admin.tableExists(tablename)) {
-				HTableDescriptor descriptor = new HTableDescriptor(TableName.valueOf(tablename));
+				HTableDescriptor descriptor = new HTableDescriptor(
+						TableName.valueOf(tablename));
 				HColumnDescriptor dataTypeSchema = new HColumnDescriptor(
 						META_TYPE_INFO_FAMILY);
 				dataTypeSchema.setBlockCacheEnabled(true);
@@ -222,7 +224,7 @@ public final class SchemaUtil {
 					dataSizeSchema.setCompressionType(Algorithm.SNAPPY);
 				dataSizeSchema.setMaxVersions(1);
 				descriptor.addFamily(dataSizeSchema);
-				
+
 				admin.createTable(descriptor, metaSplitKeys());
 			}
 		} catch (TableExistsException e) {
@@ -234,8 +236,8 @@ public final class SchemaUtil {
 
 	private static byte[][] metaSplitKeys() {
 		byte[][] splitKeys = new byte[DataType.values().length][];
-		int i =0;
-		for(DataType type : DataType.values()) {
+		int i = 0;
+		for (DataType type : DataType.values()) {
 			splitKeys[i] = Bytes.toBytes(type.indexName);
 			++i;
 		}
@@ -345,7 +347,8 @@ public final class SchemaUtil {
 
 	public static HTableDescriptor getArchiveHTableDescriptor(
 			boolean withCompression) {
-		HTableDescriptor descriptor = new HTableDescriptor(TableName.valueOf(ARCHIVE_TABLE_NAME));
+		HTableDescriptor descriptor = new HTableDescriptor(
+				TableName.valueOf(ARCHIVE_TABLE_NAME));
 		HColumnDescriptor activeJobSchema = new HColumnDescriptor(
 				ARCHIVE_ACTIVE_JOB_FAMILY);
 		activeJobSchema.setBlockCacheEnabled(false);

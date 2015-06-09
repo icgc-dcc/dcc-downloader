@@ -174,7 +174,6 @@ public class ArchiveMetaManager implements AutoCloseable {
 		metaTable.delete(delete);
 	}
 
-
 	public void addHeader(String dataType, String[] headers) throws IOException {
 		Put metaPut = new Put(Bytes.toBytes(dataType));
 		if (headers != null) {
@@ -307,8 +306,10 @@ public class ArchiveMetaManager implements AutoCloseable {
 
 	}
 
-	public long getNextSequence(String dataType, int id, long incr) throws IOException {
-		return metaTable.incrementColumnValue(Bytes.toBytes(dataType), META_SIZE_INFO_FAMILY, Bytes.toBytes(id), incr);
+	public long getNextSequence(String dataType, int id, long incr)
+			throws IOException {
+		return metaTable.incrementColumnValue(Bytes.toBytes(dataType),
+				META_SIZE_INFO_FAMILY, Bytes.toBytes(id), incr);
 	}
 
 }

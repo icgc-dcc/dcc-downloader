@@ -24,7 +24,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class SizeInfo {
 
-  private long totalLine;
-  private long totalSize;
+	private long totalLine;
+	private long totalSize;
 
 }

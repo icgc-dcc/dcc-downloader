@@ -7,11 +7,11 @@ import lombok.Data;
 @AllArgsConstructor
 public class SelectionEntry<K, V> {
 
-  private K key;
-  private V value;
+	private K key;
+	private V value;
 
-  public SelectionEntry() {
-    this.key = null;
-    this.value = null;
-  }
+	public SelectionEntry() {
+		this.key = null;
+		this.value = null;
+	}
 }
