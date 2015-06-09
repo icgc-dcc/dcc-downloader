@@ -31,44 +31,44 @@ import com.google.protobuf.InvalidProtocolBufferException;
 @Slf4j
 public final class DonorIdEncodingUtil {
 
-	public static final int BASE64_OPTIONS = Base64.GZIP
-			| Base64.DONT_BREAK_LINES | Base64.URL_SAFE;
+  public static final int BASE64_OPTIONS = Base64.GZIP
+      | Base64.DONT_BREAK_LINES | Base64.URL_SAFE;
 
-	public static List<Integer> convertCodeToList(byte[] encodedDonorIds) {
-		try {
-			return DonorSelection.parseFrom(encodedDonorIds).getIdList();
-		} catch (InvalidProtocolBufferException e) {
-			log.error("Unable to decode donor Ids: {}", encodedDonorIds, e);
-			throw new RuntimeException(e);
-		}
-	}
+  public static List<Integer> convertCodeToList(byte[] encodedDonorIds) {
+    try {
+      return DonorSelection.parseFrom(encodedDonorIds).getIdList();
+    } catch (InvalidProtocolBufferException e) {
+      log.error("Unable to decode donor Ids: {}", encodedDonorIds, e);
+      throw new RuntimeException(e);
+    }
+  }
 
-	public static List<Integer> convertCodeToList(String encodedDonorIds) {
-		try {
-			return DonorSelection.parseFrom(
-					Base64.decode(encodedDonorIds, BASE64_OPTIONS)).getIdList();
-		} catch (InvalidProtocolBufferException e) {
-			log.error("Unable to decode donor Ids: {}", encodedDonorIds, e);
-			throw new RuntimeException(e);
-		}
-	}
+  public static List<Integer> convertCodeToList(String encodedDonorIds) {
+    try {
+      return DonorSelection.parseFrom(
+          Base64.decode(encodedDonorIds, BASE64_OPTIONS)).getIdList();
+    } catch (InvalidProtocolBufferException e) {
+      log.error("Unable to decode donor Ids: {}", encodedDonorIds, e);
+      throw new RuntimeException(e);
+    }
+  }
 
-	public static byte[] convertCodeToBytes(String encodedDonorIds) {
-		return Base64.decode(encodedDonorIds, BASE64_OPTIONS);
-	}
+  public static byte[] convertCodeToBytes(String encodedDonorIds) {
+    return Base64.decode(encodedDonorIds, BASE64_OPTIONS);
+  }
 
-	public static String encodeDonorIds(Set<String> donorIds) {
-		Builder builder = DonorSelection.newBuilder();
-		for (String donorId : donorIds) {
-			builder.addId(SchemaUtil.extractId(donorId));
-		}
-		return Base64
-				.encodeBytes(builder.build().toByteArray(), BASE64_OPTIONS);
-	}
+  public static String encodeDonorIds(Set<String> donorIds) {
+    Builder builder = DonorSelection.newBuilder();
+    for (String donorId : donorIds) {
+      builder.addId(SchemaUtil.extractId(donorId));
+    }
+    return Base64
+        .encodeBytes(builder.build().toByteArray(), BASE64_OPTIONS);
+  }
 
-	public static String encodeIds(Set<Integer> donorIds) {
-		DonorSelection selection = DonorSelection.newBuilder()
-				.addAllId(donorIds).build();
-		return Base64.encodeBytes(selection.toByteArray(), BASE64_OPTIONS);
-	}
+  public static String encodeIds(Set<Integer> donorIds) {
+    DonorSelection selection = DonorSelection.newBuilder()
+        .addAllId(donorIds).build();
+    return Base64.encodeBytes(selection.toByteArray(), BASE64_OPTIONS);
+  }
 }

@@ -7,6 +7,6 @@ import lombok.Value;
 @AllArgsConstructor
 public class ArchiveCompositeKey {
 
-	int donorId;
-	long lineNum;
+  int donorId;
+  long lineNum;
 }

@@ -34,33 +34,33 @@ import com.google.common.collect.ImmutableSet;
  */
 public class DonorIdEncodingUtilTest {
 
-	@Test
-	public void testDonorIdsCodec1Valid() {
-		ImmutableSet.Builder<String> expectedBuilder = ImmutableSet.builder();
-		Random ran = new Random();
+  @Test
+  public void testDonorIdsCodec1Valid() {
+    ImmutableSet.Builder<String> expectedBuilder = ImmutableSet.builder();
+    Random ran = new Random();
 
-		int MAX_NUM_ID = 1000;
-		for (int i = 0; i < MAX_NUM_ID; ++i) {
-			expectedBuilder.add(SchemaUtil.decodeDonorId(ran
-					.nextInt(Integer.MAX_VALUE / 2)));
-		}
-		Set<String> expectedDonorIds = expectedBuilder.build();
+    int MAX_NUM_ID = 1000;
+    for (int i = 0; i < MAX_NUM_ID; ++i) {
+      expectedBuilder.add(SchemaUtil.decodeDonorId(ran
+          .nextInt(Integer.MAX_VALUE / 2)));
+    }
+    Set<String> expectedDonorIds = expectedBuilder.build();
 
-		String code = DonorIdEncodingUtil.encodeDonorIds(expectedDonorIds);
-		List<Integer> actualIds = DonorIdEncodingUtil.convertCodeToList(code);
+    String code = DonorIdEncodingUtil.encodeDonorIds(expectedDonorIds);
+    List<Integer> actualIds = DonorIdEncodingUtil.convertCodeToList(code);
 
-		ImmutableSet.Builder<String> actualBuilder = ImmutableSet.builder();
-		for (Integer id : actualIds) {
-			actualBuilder.add(SchemaUtil.decodeDonorId(id));
-		}
-		ImmutableSet<String> actualDonorIds = actualBuilder.build();
-		assertThat(actualDonorIds).containsAll(expectedDonorIds).hasSameSizeAs(
-				expectedDonorIds);
+    ImmutableSet.Builder<String> actualBuilder = ImmutableSet.builder();
+    for (Integer id : actualIds) {
+      actualBuilder.add(SchemaUtil.decodeDonorId(id));
+    }
+    ImmutableSet<String> actualDonorIds = actualBuilder.build();
+    assertThat(actualDonorIds).containsAll(expectedDonorIds).hasSameSizeAs(
+        expectedDonorIds);
 
-	}
+  }
 
-	@Test(expected = NumberFormatException.class)
-	public void testDonorIdsCodec1InValid() {
-		DonorIdEncodingUtil.encodeDonorIds(ImmutableSet.<String> of("DO___"));
-	}
+  @Test(expected = NumberFormatException.class)
+  public void testDonorIdsCodec1InValid() {
+    DonorIdEncodingUtil.encodeDonorIds(ImmutableSet.<String> of("DO___"));
+  }
 }
