@@ -41,6 +41,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
@@ -60,7 +61,7 @@ import com.google.common.collect.ImmutableMap;
  * ArchiveMetaManager maintains the meta information during archiving process
  */
 @Slf4j
-public class ArchiveMetaManager {
+public class ArchiveMetaManager implements AutoCloseable {
 
   private static final int INCREMENT_DELAY_CYCLE = 5;
   private final HTable metaTable;
@@ -75,40 +76,48 @@ public class ArchiveMetaManager {
 
   public ArchiveMetaManager(Configuration config) throws IOException {
     String metaTablename = config.get(META_TABLE_NAME_PROPERTY);
-    metaTable = (metaTablename == null) ? new HTable(config, META_TABLE_NAME) : new HTable(config, metaTablename);
+    metaTable = (metaTablename == null) ? new HTable(config,
+        META_TABLE_NAME) : new HTable(config, metaTablename);
     archiveTable = new HTable(config, ARCHIVE_TABLE_NAME);
-    archiveTable.setAutoFlush(false);
-    metaTable.setAutoFlush(false);
+    archiveTable.setAutoFlushTo(false);
+    metaTable.setAutoFlushTo(false);
     lookupMap = newHashMap();
     runningIncrement = new AtomicLong(0);
     runningTotalCount = 0;
     executor = Executors.newSingleThreadScheduledExecutor();
   }
 
-  public ArchiveMetaManager(String metaTablename, Configuration config) throws IOException {
+  public ArchiveMetaManager(String metaTablename, Configuration config)
+      throws IOException {
     metaTable = new HTable(config, metaTablename);
     archiveTable = new HTable(config, ARCHIVE_TABLE_NAME);
-    archiveTable.setAutoFlush(false);
-    metaTable.setAutoFlush(false);
+    archiveTable.setAutoFlushTo(false);
+    metaTable.setAutoFlushTo(false);
     lookupMap = newHashMap();
     runningIncrement = new AtomicLong(0);
     runningTotalCount = 0;
     executor = Executors.newSingleThreadScheduledExecutor();
   }
 
-  public List<Integer> initialize(String dataType, List<Integer> donorIds, String downloadId, int ttl)
-      throws IOException {
+  public List<Integer> initialize(String dataType, List<Integer> donorIds,
+      String downloadId, int ttl) throws IOException {
     Get getDonorSizeInfo = new Get(Bytes.toBytes(dataType));
     for (int id : donorIds) {
-      getDonorSizeInfo.addColumn(META_SIZE_INFO_FAMILY, Bytes.toBytes(id));
+      getDonorSizeInfo
+          .addColumn(META_SIZE_INFO_FAMILY, Bytes.toBytes(id));
     }
 
-    log.info("Initializing archiving job with stats for data type: " + dataType);
+    log.info("Initializing archiving job with stats for data type: "
+        + dataType);
     Result result = metaTable.get(getDonorSizeInfo);
-    NavigableMap<byte[], byte[]> sizeInfoMap = result.getFamilyMap(META_SIZE_INFO_FAMILY);
+    NavigableMap<byte[], byte[]> sizeInfoMap = result
+        .getFamilyMap(META_SIZE_INFO_FAMILY);
     if (sizeInfoMap == null) {
-      log.error("No donor information found for download id: " + downloadId);
-      throw new RuntimeException("Please check with the integrity of the data for download id: " + downloadId);
+      log.error("No donor information found for download id: "
+          + downloadId);
+      throw new RuntimeException(
+          "Please check with the integrity of the data for download id: "
+              + downloadId);
     }
     long totalLine = 0;
     Builder<Integer> filteredId = ImmutableList.builder();
@@ -119,17 +128,19 @@ public class ArchiveMetaManager {
       totalLine = totalLine + sizeInfo.getTotalLine();
     }
 
-    Map<DataType, JobProgress> statsInfoMap =
-        ImmutableMap.of(DataType.valueOf(dataType.toUpperCase()),
-            new JobProgress(0L, totalLine));
-    Map<byte[], byte[]> encodedStatsInfoMap = SchemaUtil.encodeStatsInfo(statsInfoMap);
+    Map<DataType, JobProgress> statsInfoMap = ImmutableMap.of(DataType
+        .valueOf(dataType.toUpperCase()),
+        new JobProgress(0L, totalLine));
+    Map<byte[], byte[]> encodedStatsInfoMap = SchemaUtil
+        .encodeStatsInfo(statsInfoMap);
     Put put = new Put(Bytes.toBytes(downloadId));
     for (val entry : encodedStatsInfoMap.entrySet()) {
       put.add(ARCHIVE_STATS_INFO_FAMILY, entry.getKey(), entry.getValue());
     }
 
-    Map<byte[], byte[]> clientInfo =
-        SchemaUtil.encodeClientJobInfo(ImmutableMap.<String, String> of(ARCHIVE_TTL_COLUMN, String.valueOf(ttl)));
+    Map<byte[], byte[]> clientInfo = SchemaUtil
+        .encodeClientJobInfo(ImmutableMap.<String, String> of(
+            ARCHIVE_TTL_COLUMN, String.valueOf(ttl)));
     for (val entry : clientInfo.entrySet()) {
       put.add(ARCHIVE_JOB_INFO_FAMILY, entry.getKey(), entry.getValue());
     }
@@ -140,25 +151,34 @@ public class ArchiveMetaManager {
     return filteredId.build();
   }
 
-  public void keepMetaInfo(String dataType, int id, long totalLine, long totalSize) throws IOException {
+  public void keepMetaInfo(String dataType, int id, long totalLine,
+      long totalSize) throws IOException {
     keepMetaInfo(dataType, id, totalLine, totalSize, null);
   }
 
-  public void keepMetaInfo(String dataType, int id, long totalLine, long totalSize, String[] headers)
-      throws IOException {
+  public void keepMetaInfo(String dataType, int id, long totalLine,
+      long totalSize, String[] headers) throws IOException {
     Put metaPut = new Put(Bytes.toBytes(dataType));
     metaPut.add(META_SIZE_INFO_FAMILY, Bytes.toBytes(id),
         SchemaUtil.encodeSizeInfo(new SizeInfo(totalLine, totalSize)));
     if (headers != null) {
-      metaPut.add(META_TYPE_INFO_FAMILY, META_TYPE_HEADER, SchemaUtil.encodeHeader(headers));
+      metaPut.add(META_TYPE_INFO_FAMILY, META_TYPE_HEADER,
+          SchemaUtil.encodeHeader(headers));
     }
     metaTable.put(metaPut);
+  }
+
+  public void deleteMetaInfo(String dataType) throws IOException {
+    Delete delete = new Delete(Bytes.toBytes(dataType));
+    delete.deleteFamily(META_SIZE_INFO_FAMILY);
+    metaTable.delete(delete);
   }
 
   public void addHeader(String dataType, String[] headers) throws IOException {
     Put metaPut = new Put(Bytes.toBytes(dataType));
     if (headers != null) {
-      metaPut.add(META_TYPE_INFO_FAMILY, META_TYPE_HEADER, SchemaUtil.encodeHeader(headers));
+      metaPut.add(META_TYPE_INFO_FAMILY, META_TYPE_HEADER,
+          SchemaUtil.encodeHeader(headers));
     }
     metaTable.put(metaPut);
   }
@@ -174,25 +194,29 @@ public class ArchiveMetaManager {
     try {
       result = metaTable.get(get);
     } catch (IOException e) {
-      log.error("Fail to retrive header information for datatype: " + dataType, e);
+      log.error("Fail to retrive header information for datatype: "
+          + dataType, e);
       throw e;
     }
 
-    String header = Bytes.toString(result.getValue(META_TYPE_INFO_FAMILY, META_TYPE_HEADER));
+    String header = Bytes.toString(result.getValue(META_TYPE_INFO_FAMILY,
+        META_TYPE_HEADER));
     if (header != null) {
       builder.add(header.split(HEADER_SEPARATOR));
     } else {
-      throw new RuntimeException("No header information found for data type: " + dataType);
+      throw new RuntimeException(
+          "No header information found for data type: " + dataType);
     }
     return builder.build();
   }
 
-  public void resetArchiveStatus(final String downloadId, final String dataType) {
+  public void resetArchiveStatus(final String downloadId,
+      final String dataType) {
 
     try {
-      archiveTable.incrementColumnValue(lookup(downloadId), ARCHIVE_STATS_INFO_FAMILY, lookup(dataType),
-          -runningTotalCount,
-          false);
+      archiveTable.incrementColumnValue(lookup(downloadId),
+          ARCHIVE_STATS_INFO_FAMILY, lookup(dataType),
+          -runningTotalCount, false);
 
     } catch (IOException e) {
       log.error("Fail to reset status");
@@ -201,7 +225,8 @@ public class ArchiveMetaManager {
     }
   }
 
-  public long reportArchiveStatus(final String downloadId, final String dataType, final long incrementAmount)
+  public long reportArchiveStatus(final String downloadId,
+      final String dataType, final long incrementAmount)
       throws IOException {
     runningTotalCount = runningTotalCount + incrementAmount;
 
@@ -214,9 +239,9 @@ public class ArchiveMetaManager {
         if (increment != 0) {
           runningIncrement.addAndGet(-increment);
           try {
-            archiveTable.incrementColumnValue(lookup(downloadId), ARCHIVE_STATS_INFO_FAMILY, lookup(dataType),
-                increment,
-                false);
+            archiveTable.incrementColumnValue(lookup(downloadId),
+                ARCHIVE_STATS_INFO_FAMILY, lookup(dataType),
+                increment, false);
           } catch (IOException e) {
             // undo
             runningIncrement.addAndGet(increment);
@@ -258,23 +283,33 @@ public class ArchiveMetaManager {
     return bytes;
   }
 
-  public void finalizeJobInfo(String downloadId, String dataType, long fileSize) throws IOException {
+  public void finalizeJobInfo(String downloadId, String dataType,
+      long fileSize) throws IOException {
     Put put = new Put(Bytes.toBytes(downloadId));
-    Map<byte[], byte[]> jobInfo = SchemaUtil.encodeClientJobInfo(ImmutableMap.<String, String> of(
-        ArchiverConstant.ARCHIVE_END_TIME_COLUMN, String.valueOf(System.currentTimeMillis())
-        ));
+    Map<byte[], byte[]> jobInfo = SchemaUtil
+        .encodeClientJobInfo(ImmutableMap.<String, String> of(
+            ArchiverConstant.ARCHIVE_END_TIME_COLUMN,
+            String.valueOf(System.currentTimeMillis())));
     for (val entry : jobInfo.entrySet()) {
       put.add(ARCHIVE_JOB_INFO_FAMILY, entry.getKey(), entry.getValue());
     }
     archiveTable.put(put);
 
-    Map<byte[], byte[]> sizeInfo = SchemaUtil.encodeClientJobInfo(ImmutableMap.<String, String> of(
-        ArchiverConstant.ARCHIVE_FILE_SIZE_COLUMN, String.valueOf(fileSize)
-        ));
+    Map<byte[], byte[]> sizeInfo = SchemaUtil
+        .encodeClientJobInfo(ImmutableMap.<String, String> of(
+            ArchiverConstant.ARCHIVE_FILE_SIZE_COLUMN,
+            String.valueOf(fileSize)));
 
-    archiveTable.incrementColumnValue(lookup(downloadId), ARCHIVE_JOB_INFO_FAMILY, sizeInfo.keySet().iterator().next(),
-        fileSize,
-        true);
+    archiveTable.incrementColumnValue(lookup(downloadId),
+        ARCHIVE_JOB_INFO_FAMILY, sizeInfo.keySet().iterator().next(),
+        fileSize, true);
 
   }
+
+  public long getNextSequence(String dataType, int id, long incr)
+      throws IOException {
+    return metaTable.incrementColumnValue(Bytes.toBytes(dataType),
+        META_SIZE_INFO_FAMILY, Bytes.toBytes(id), incr);
+  }
+
 }

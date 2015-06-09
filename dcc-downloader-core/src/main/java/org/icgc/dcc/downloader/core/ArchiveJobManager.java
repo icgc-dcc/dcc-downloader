@@ -55,16 +55,19 @@ public class ArchiveJobManager {
   private byte capacityThreshold;
   private final static JobStatus EMPTY_JOB_STATUS = new JobStatus(null,
       ImmutableMap.<DataType, JobProgress> of(), true, false);
-  private static final JobStatus ERROR_JOB_STATUS = new JobStatus(Status.FAILED,
-      ImmutableMap.<DataType, JobProgress> of(), false, false);
+  private static final JobStatus ERROR_JOB_STATUS = new JobStatus(
+      Status.FAILED, ImmutableMap.<DataType, JobProgress> of(), false,
+      false);
 
-  public ArchiveJobManager(TableResourceManager tableManager, String oozieUrl, byte overCapacityThresholdPercentage) {
+  public ArchiveJobManager(TableResourceManager tableManager,
+      String oozieUrl, byte overCapacityThresholdPercentage) {
     this.tableManager = tableManager;
     this.oozieUrl = oozieUrl;
     this.capacityThreshold = overCapacityThresholdPercentage;
   }
 
-  public Map<String, JobStatus> getStatus(Set<String> downloadIds) throws IOException {
+  public Map<String, JobStatus> getStatus(Set<String> downloadIds)
+      throws IOException {
     HTable archiveTable = tableManager.getArchiveTable();
     ImmutableMap.Builder<String, JobStatus> allStatusBuilder = ImmutableMap
         .builder();
@@ -84,7 +87,8 @@ public class ArchiveJobManager {
         for (Result result : results) {
           if (!result.isEmpty()) {
             String downloadId = Bytes.toString(result.getRow());
-            NavigableMap<byte[], byte[]> jobInfoMap = result.getFamilyMap(ARCHIVE_JOB_INFO_FAMILY);
+            NavigableMap<byte[], byte[]> jobInfoMap = result
+                .getFamilyMap(ARCHIVE_JOB_INFO_FAMILY);
             NavigableMap<byte[], byte[]> statsInfoMap = result
                 .getFamilyMap(ARCHIVE_STATS_INFO_FAMILY);
 
@@ -92,18 +96,22 @@ public class ArchiveJobManager {
               allStatusBuilder.put(downloadId, EMPTY_JOB_STATUS);
               continue;
             }
-            ImmutableMap<JobInfoType, ImmutableMap<String, String>> jobInfo =
-                SchemaUtil.decodeJobInfo(jobInfoMap);
-            ImmutableMap<String, String> info = jobInfo.get(JobInfoType.SYSTEM);
+            ImmutableMap<JobInfoType, ImmutableMap<String, String>> jobInfo = SchemaUtil
+                .decodeJobInfo(jobInfoMap);
+            ImmutableMap<String, String> info = jobInfo
+                .get(JobInfoType.SYSTEM);
 
             String oozieId = info.get(ARCHIVE_OOZIE_ID_COLUMN);
             Status workflowStatus = getWorkflowStatus(oozieId);
-            Map<DataType, JobProgress> progressMap = SchemaUtil.decodeStatsInfo(statsInfoMap);
+            Map<DataType, JobProgress> progressMap = SchemaUtil
+                .decodeStatsInfo(statsInfoMap);
             if (isExpired(jobInfo.get(JobInfoType.CLIENT))) {
-              allStatusBuilder.put(downloadId, new JobStatus(workflowStatus, progressMap, false, true));
+              allStatusBuilder.put(downloadId, new JobStatus(
+                  workflowStatus, progressMap, false, true));
             } else {
 
-              allStatusBuilder.put(downloadId, new JobStatus(workflowStatus, progressMap, false, false));
+              allStatusBuilder.put(downloadId, new JobStatus(
+                  workflowStatus, progressMap, false, false));
             }
           } else {
             log.warn("download Id does not exist: {}",
@@ -131,8 +139,10 @@ public class ArchiveJobManager {
    * @return
    */
   boolean isExpired(Map<String, String> info) {
-    // when the job has not finished yet, no end time and ttl should be expected
-    if (info.containsKey(ARCHIVE_TTL_COLUMN) && info.containsKey(ARCHIVE_END_TIME_COLUMN)) {
+    // when the job has not finished yet, no end time and ttl should be
+    // expected
+    if (info.containsKey(ARCHIVE_TTL_COLUMN)
+        && info.containsKey(ARCHIVE_END_TIME_COLUMN)) {
       long currentTime = System.currentTimeMillis();
       long ttl = Long.valueOf(info.get(ARCHIVE_TTL_COLUMN)) * 3600000L;
       long endTime = Long.valueOf(info.get(ARCHIVE_END_TIME_COLUMN));
@@ -166,22 +176,26 @@ public class ArchiveJobManager {
   }
 
   public Map<DataType, Map<String, Long>> getSizeInfo() throws IOException {
-    ImmutableMap.Builder<DataType, Map<String, Long>> resultMapBuilder = ImmutableMap.builder();
+    ImmutableMap.Builder<DataType, Map<String, Long>> resultMapBuilder = ImmutableMap
+        .builder();
     HTable metaTable = tableManager.getMetaTable();
     try {
 
       for (val dataType : DataType.values()) {
-        Get dataTypeSizeInfo = new Get(Bytes.toBytes(dataType.indexName));
+        Get dataTypeSizeInfo = new Get(
+            Bytes.toBytes(dataType.indexName));
         dataTypeSizeInfo.addFamily(META_SIZE_INFO_FAMILY);
-        ImmutableMap.Builder<String, Long> sizeMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<String, Long> sizeMapBuilder = ImmutableMap
+            .builder();
         Result result = metaTable.get(dataTypeSizeInfo);
         if (result != null && !result.isEmpty()) {
-          NavigableMap<byte[], byte[]> sizeMapInBytes = result.getFamilyMap(META_SIZE_INFO_FAMILY);
+          NavigableMap<byte[], byte[]> sizeMapInBytes = result
+              .getFamilyMap(META_SIZE_INFO_FAMILY);
           for (val entry : sizeMapInBytes.entrySet()) {
-            sizeMapBuilder.put(
-                SchemaUtil.decodeDonorId(entry.getKey()),
-                SchemaUtil.decodeSizeInfo(entry.getValue()).getTotalSize()
-                );
+            sizeMapBuilder.put(SchemaUtil.decodeDonorId(entry
+                .getKey()),
+                SchemaUtil.decodeSizeInfo(entry.getValue())
+                    .getTotalSize());
           }
         }
         resultMapBuilder.put(dataType, sizeMapBuilder.build());
@@ -192,7 +206,8 @@ public class ArchiveJobManager {
     return resultMapBuilder.build();
   }
 
-  private Status getWorkflowStatus(String oozieId) throws OozieClientException {
+  private Status getWorkflowStatus(String oozieId)
+      throws OozieClientException {
     OozieClient cli = new OozieClient(this.oozieUrl);
     WorkflowJob jobInfo = cli.getJobInfo(oozieId);
     return jobInfo.getStatus();
@@ -219,7 +234,8 @@ public class ArchiveJobManager {
      * @return
      */
     public boolean isCompleted() {
-      if (numerator == 0 || denominator == 0 || ((float) numerator / denominator) < 1) {
+      if (numerator == 0 || denominator == 0
+          || ((float) numerator / denominator) < 1) {
         return false;
       } else {
         return true;
@@ -247,44 +263,49 @@ public class ArchiveJobManager {
     ImmutableMap.Builder<byte[], byte[]> jobInfoBuilder = ImmutableMap
         .builder();
 
-    jobInfoBuilder.putAll(
-        SchemaUtil.encodeSystemJobInfo(ImmutableMap
-            .<String, String> of(
-                ARCHIVE_USER_EMAIL_COLUMN, jobContext.getUserEmailAddress(),
-                ARCHIVE_ENCODED_DONOR_IDS_COLUMN, jobContext.getEncodedDonorIds(),
-                ARCHIVE_DATA_TYPE_INFO_COLUMN, SchemaUtil.encodeTypeInfo(jobContext.getFilterTypeInfo()),
-                ARCHIVE_OOZIE_ID_COLUMN, oozieId
-            )
-            )
-        );
-    jobInfoBuilder.putAll(SchemaUtil.encodeClientJobInfo(jobContext.getJobInfo()));
+    jobInfoBuilder.putAll(SchemaUtil.encodeSystemJobInfo(ImmutableMap
+        .<String, String> of(ARCHIVE_USER_EMAIL_COLUMN, jobContext
+            .getUserEmailAddress(),
+            ARCHIVE_ENCODED_DONOR_IDS_COLUMN, jobContext
+                .getEncodedDonorIds(),
+            ARCHIVE_DATA_TYPE_INFO_COLUMN,
+            SchemaUtil.encodeTypeInfo(jobContext
+                .getFilterTypeInfo()), ARCHIVE_OOZIE_ID_COLUMN,
+            oozieId)));
+    jobInfoBuilder.putAll(SchemaUtil.encodeClientJobInfo(jobContext
+        .getJobInfo()));
     for (val info : jobInfoBuilder.build().entrySet()) {
       jobInfoPut.add(ARCHIVE_JOB_INFO_FAMILY, info.getKey(),
           info.getValue());
     }
 
-    ImmutableMap.Builder<DataType, JobProgress> statsInfoBuilder = ImmutableMap.builder();
+    ImmutableMap.Builder<DataType, JobProgress> statsInfoBuilder = ImmutableMap
+        .builder();
     JobProgress initialProgress = new JobProgress(0, 0);
 
     for (val dataType : jobContext.getDataTypes()) {
       statsInfoBuilder.put(dataType, initialProgress);
     }
-    for (val info : SchemaUtil.encodeStatsInfo(statsInfoBuilder.build()).entrySet()) {
-      jobInfoPut.add(ARCHIVE_STATS_INFO_FAMILY, info.getKey(), info.getValue());
+    for (val info : SchemaUtil.encodeStatsInfo(statsInfoBuilder.build())
+        .entrySet()) {
+      jobInfoPut.add(ARCHIVE_STATS_INFO_FAMILY, info.getKey(),
+          info.getValue());
     }
 
     HTable archiveTable = tableManager.getArchiveTable();
     try {
       archiveTable.put(jobInfoPut);
     } catch (IOException e) {
-      log.error("fail to record job information: {}", jobContext.getDownloadId(), e);
+      log.error("fail to record job information: {}",
+          jobContext.getDownloadId(), e);
       throw new RuntimeException(e);
     } finally {
       tableManager.closeTable(archiveTable);
     }
   }
 
-  public Map<DataType, List<String>> getHeader(List<DataType> dataTypes) throws IOException {
+  public Map<DataType, List<String>> getHeader(List<DataType> dataTypes)
+      throws IOException {
     HTable metaTable = tableManager.getMetaTable();
     try {
       ImmutableList.Builder<Get> headerInfo = ImmutableList.builder();
@@ -296,28 +317,35 @@ public class ArchiveJobManager {
       Result[] results = metaTable.get(headerInfo.build());
 
       if (results != null) {
-        ImmutableMap.Builder<DataType, List<String>> headerLookupBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<DataType, List<String>> headerLookupBuilder = ImmutableMap
+            .builder();
         for (Result result : results) {
           if (result.isEmpty()
               || !result.containsColumn(META_TYPE_INFO_FAMILY,
                   META_TYPE_HEADER)) {
             log.error("Could not found header information for data type: "
                 + Bytes.toString(result.getRow()));
-            throw new IOException("Fail to retrieve header information for data type: "
-                + Bytes.toString(result.getRow()));
+            throw new IOException(
+                "Fail to retrieve header information for data type: "
+                    + Bytes.toString(result.getRow()));
           } else {
-            KeyValue kv = result.getColumnLatest(META_TYPE_INFO_FAMILY,
-                META_TYPE_HEADER);
-            String[] headers = SchemaUtil.decodeHeader(kv.getValue());
+            KeyValue kv = result.getColumnLatest(
+                META_TYPE_INFO_FAMILY, META_TYPE_HEADER);
+            String[] headers = SchemaUtil.decodeHeader(kv
+                .getValue());
             String dataTypeName = Bytes.toString(result.getRow());
-            DataType dataType = DataType.valueOf(dataTypeName.toUpperCase());
-            headerLookupBuilder.put(dataType, ImmutableList.copyOf(headers));
+            DataType dataType = DataType.valueOf(dataTypeName
+                .toUpperCase());
+            headerLookupBuilder.put(dataType,
+                ImmutableList.copyOf(headers));
           }
         }
         return headerLookupBuilder.build();
       } else {
-        RuntimeException e = new RuntimeException("No header information found founds: " + dataTypes);
-        log.error("Unable to retrieve header inforamtion on table: {}", Bytes.toString(metaTable.getTableName()), e);
+        RuntimeException e = new RuntimeException(
+            "No header information found founds: " + dataTypes);
+        log.error("Unable to retrieve header inforamtion on table: {}",
+            Bytes.toString(metaTable.getTableName()), e);
         throw e;
       }
     } catch (IOException e) {
@@ -353,7 +381,8 @@ public class ArchiveJobManager {
                 .decodeJobInfo(jobInfoMap);
 
             String downloadId = Bytes.toString(result.getRow());
-            allInfoBuilder.put(downloadId, jobInfo.get(JobInfoType.CLIENT));
+            allInfoBuilder.put(downloadId,
+                jobInfo.get(JobInfoType.CLIENT));
 
           } else {
             log.warn("download Id does not exist: {}",
@@ -380,24 +409,29 @@ public class ArchiveJobManager {
     try {
       Get get = new Get(Bytes.toBytes(downloadId));
       get.addFamily(ARCHIVE_STATS_INFO_FAMILY);
-      get.addColumn(ARCHIVE_JOB_INFO_FAMILY, SchemaUtil.encodeSystemJobInfoKey(ARCHIVE_OOZIE_ID_COLUMN));
+      get.addColumn(ARCHIVE_JOB_INFO_FAMILY,
+          SchemaUtil.encodeSystemJobInfoKey(ARCHIVE_OOZIE_ID_COLUMN));
       Result result = archiveTable.get(get);
 
       if (result == null || result.isEmpty()) {
-        log.warn("Fail to cancel because download id not found: {} ", downloadId);
+        log.warn("Fail to cancel because download id not found: {} ",
+            downloadId);
         // NOT EMPTY, ERROR_JOB_STATUS
         return ERROR_JOB_STATUS;
       } else {
-        ImmutableMap<JobInfoType, ImmutableMap<String, String>> jobInfoMap =
-            SchemaUtil.decodeJobInfo(result.getFamilyMap(ARCHIVE_JOB_INFO_FAMILY));
+        ImmutableMap<JobInfoType, ImmutableMap<String, String>> jobInfoMap = SchemaUtil
+            .decodeJobInfo(result
+                .getFamilyMap(ARCHIVE_JOB_INFO_FAMILY));
         NavigableMap<byte[], byte[]> statsInfoMap = result
             .getFamilyMap(ARCHIVE_STATS_INFO_FAMILY);
 
         if (statsInfoMap.isEmpty() || jobInfoMap.isEmpty()) return ERROR_JOB_STATUS;
-        String oozieId = jobInfoMap.get(JobInfoType.SYSTEM).get(ARCHIVE_OOZIE_ID_COLUMN);
+        String oozieId = jobInfoMap.get(JobInfoType.SYSTEM).get(
+            ARCHIVE_OOZIE_ID_COLUMN);
         OozieClient cli = new OozieClient(this.oozieUrl);
         cli.kill(oozieId);
-        Map<DataType, JobProgress> progressMap = SchemaUtil.decodeStatsInfo(statsInfoMap);
+        Map<DataType, JobProgress> progressMap = SchemaUtil
+            .decodeStatsInfo(statsInfoMap);
         return new JobStatus(Status.KILLED, progressMap, false, false);
       }
 
@@ -417,14 +451,16 @@ public class ArchiveJobManager {
     recordCurrentNumberOfDownload(downloadId, -1);
   }
 
-  private void recordCurrentNumberOfDownload(String downloadId, long numOfDownload) {
+  private void recordCurrentNumberOfDownload(String downloadId,
+      long numOfDownload) {
     HTable archiveTable = tableManager.getArchiveTable();
     try {
-      archiveTable.incrementColumnValue(
-          Bytes.toBytes(downloadId), ARCHIVE_ACTIVE_JOB_FAMILY,
+      archiveTable.incrementColumnValue(Bytes.toBytes(downloadId),
+          ARCHIVE_ACTIVE_JOB_FAMILY,
           ARCHIVE_ACTIVE_DOWNLOAD_COUNTER_COLUMN, numOfDownload);
     } catch (IOException e) {
-      log.error("fail to increment the download counter for ID: {}", downloadId, e);
+      log.error("fail to increment the download counter for ID: {}",
+          downloadId, e);
     } finally {
       tableManager.closeTable(archiveTable);
     }
@@ -442,12 +478,15 @@ public class ArchiveJobManager {
     }
   }
 
-  // only allow download if storage has at least FREE_DISK_SPACE_PERCENTAGE of free disk space
+  // only allow download if storage has at least FREE_DISK_SPACE_PERCENTAGE of
+  // free disk space
   public boolean isOverCapacity() {
     try {
       if (capacityThreshold > tableManager.getFreeDiskSpacePercentage()) {
-        log.warn("Threshold limit reached for storage: {}", capacityThreshold);
-        log.warn("Running low in disk space, only left (%): {}", tableManager.getFreeDiskSpacePercentage());
+        log.warn("Threshold limit reached for storage: {}",
+            capacityThreshold);
+        log.warn("Running low in disk space, only left (%): {}",
+            tableManager.getFreeDiskSpacePercentage());
         return true;
       }
     } catch (IOException e) {
@@ -457,9 +496,6 @@ public class ArchiveJobManager {
     return false;
   }
 
-  /**
-   * @return
-   */
   public String getReleaseName() {
     return tableManager.getReleaseName();
   }

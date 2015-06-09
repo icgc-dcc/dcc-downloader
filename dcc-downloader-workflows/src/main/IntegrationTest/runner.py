@@ -16,11 +16,11 @@ validationRootDir = '/tmp/dd-validation/'
 
 # Donor Id field position
 donorIDPos = {
-        'clinical' : '$0',
-        'clinicalsample' : '$3',
+        'donor' : '$0',
+        'sample' : '$5',
         'ssm_open' : '$1',
         'ssm_controlled' : '$1',
-        'sgv_controlled' : '$1',
+        'sgv_controlled' : '$0',
         'cnsm' : '$0',
         'stsm' : '$0',
         'exp' : '$0',
@@ -37,11 +37,11 @@ donorIDPos = {
 
 # Project code field position
 projectCodePos = {
-        'clinical' : '$1',
-        'clinicalsample' : '$1',
+        'donor' : '$1',
+        'sample' : '$1',
         'ssm_open' : '$2',
         'ssm_controlled' : '$2',
-        'sgv_controlled' : '$2',
+        'sgv_controlled' : '$1',
         'cnsm' : '$1',
         'stsm' : '$1',
         'exp' : '$1',
@@ -145,7 +145,7 @@ def download(downloadId, dataType, testDir):
 # copy to HDFS
 def copyToHDFS(toDir):
 	os.system("HADOOP_USER_NAME=downloader hdfs dfs -rm -r " + validationRootDir + toDir)
-	os.system("HADOOP_USER_NAME=downloader hdfs dfs -mkdir " + validationRootDir + toDir + '/download/')
+	os.system("HADOOP_USER_NAME=downloader hdfs dfs -mkdir -p " + validationRootDir + toDir + '/download/')
 	os.system("HADOOP_USER_NAME=downloader hdfs dfs -put " + toDir + "/* " + validationRootDir + toDir + '/download/')
 
 def validate(type, projects, experiment, staticRootDir):
@@ -160,7 +160,7 @@ def validate(type, projects, experiment, staticRootDir):
 	params["OUTPUT_CONTENT_MISMATCH"] = output + '/result/content'
 	params["OUTPUT_HEADER_MISMATCH"] = output + '/result/header'
 	Pig.set('default_parallel', '100')
-	P = Pig.compileFromFile(type, "validate.pig")
+	P = Pig.compileFromFile(type, "validation.pig")
 	bound = P.bind(params)
 	stats = bound.runSingle()
 	if not stats.isSuccessful():
@@ -170,7 +170,7 @@ def validate(type, projects, experiment, staticRootDir):
 
 def main(argv) :
 	projects = ''
-	type = 'ssm'
+	type = ''
 	experiment = 'unname'
 	staticRootDir = ''
 	try:
@@ -191,19 +191,19 @@ def main(argv) :
 		elif opt in ("-i", "--input"):
 		  staticRootDir = arg
 
-		if os.path.exists('download') :
-			shutil.rmtree('download')
-			os.mkdir('download')
+    if os.path.exists('download') :
+            shutil.rmtree('download')
+    os.mkdir('download')
 
-		if os.path.exists(experiment) :
-			shutil.rmtree(experiment)
-			os.mkdir(experiment)
+    if os.path.exists(experiment) :
+            shutil.rmtree(experiment)
+    os.mkdir(experiment)
 
-		downloadId = submitJob(projects, type)
-		wait(downloadId)
-		download(downloadId, type, experiment)
-		copyToHDFS(experiment)
-		validate(type,projects,experiment,staticRootDir)
+    downloadId = submitJob(projects, type)
+    wait(downloadId)
+    download(downloadId, type, experiment)
+    copyToHDFS(experiment)
+    validate(type,projects,experiment,staticRootDir)
 
 if __name__ == "__main__":
 	main(sys.argv[1:])

@@ -41,7 +41,8 @@ public class ArchiveJobSubmitter {
     this(DEFAULT_OOZIE_URL, DEFAULT_APP_PATH, supportEmailAddress);
   }
 
-  public ArchiveJobSubmitter(String oozieUrl, String appPath, String supportEmailAddress) {
+  public ArchiveJobSubmitter(String oozieUrl, String appPath,
+      String supportEmailAddress) {
     this.oozieUrl = oozieUrl;
     this.appPath = appPath;
     this.supportEmailAddress = supportEmailAddress;
@@ -60,7 +61,8 @@ public class ArchiveJobSubmitter {
       conf.setProperty(dataType.indexName, "true");
     }
 
-    conf.setProperty(WORKFLOW_ENCODED_DONOR_IDS_PROPERTY, job.encodedDonorIds);
+    conf.setProperty(WORKFLOW_ENCODED_DONOR_IDS_PROPERTY,
+        job.encodedDonorIds);
 
     conf.setProperty(WORKFLOW_USER_EMAIL_PROPERTY, job.userEmailAddress);
     conf.setProperty(WORKFLOW_SUPPORT_EMAIL_PROPERTY, supportEmailAddress);

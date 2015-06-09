@@ -42,14 +42,16 @@ public class Utils {
   public static CompositeKey getCompositeKey(String key) {
     String[] info = key.split(Pattern.quote(KEY_SEPARATOR));
     checkArgument(info.length == NUM_PARTS_COMPOSITE_KEY,
-        "Skipping this key because it does not conform to the key structure: " + key);
+        "Skipping this key because it does not conform to the key structure: "
+            + key);
     String project = info[0];
     String donorId = info[1];
     String fileType = info[2];
     String dataType = info[3];
     int state = Integer.parseInt(info[4]);
     long size = Long.parseLong(info[5]);
-    return new CompositeKey(project, donorId, fileType, dataType, size, state);
+    return new CompositeKey(project, donorId, fileType, dataType, size,
+        state);
   }
 
   @AllArgsConstructor

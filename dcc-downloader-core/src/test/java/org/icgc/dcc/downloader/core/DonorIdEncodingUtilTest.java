@@ -41,7 +41,8 @@ public class DonorIdEncodingUtilTest {
 
     int MAX_NUM_ID = 1000;
     for (int i = 0; i < MAX_NUM_ID; ++i) {
-      expectedBuilder.add(SchemaUtil.decodeDonorId(ran.nextInt(Integer.MAX_VALUE / 2)));
+      expectedBuilder.add(SchemaUtil.decodeDonorId(ran
+          .nextInt(Integer.MAX_VALUE / 2)));
     }
     Set<String> expectedDonorIds = expectedBuilder.build();
 
@@ -53,7 +54,8 @@ public class DonorIdEncodingUtilTest {
       actualBuilder.add(SchemaUtil.decodeDonorId(id));
     }
     ImmutableSet<String> actualDonorIds = actualBuilder.build();
-    assertThat(actualDonorIds).containsAll(expectedDonorIds).hasSameSizeAs(expectedDonorIds);
+    assertThat(actualDonorIds).containsAll(expectedDonorIds).hasSameSizeAs(
+        expectedDonorIds);
 
   }
 

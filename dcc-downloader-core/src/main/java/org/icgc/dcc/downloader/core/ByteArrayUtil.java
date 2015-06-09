@@ -20,7 +20,6 @@ package org.icgc.dcc.downloader.core;
 import java.util.BitSet;
 import java.util.Set;
 
-
 /**
  * Class providing utility methods for handling byte arrays.
  */
@@ -70,8 +69,10 @@ public class ByteArrayUtil {
   }
 
   public static int getInt(byte[] array, int offset) {
-    return ((array[offset] & 0xff) << 24) | ((array[offset + 1] & 0xff) << 16)
-        | ((array[offset + 2] & 0xff) << 8) | (array[offset + 3] & 0xff);
+    return ((array[offset] & 0xff) << 24)
+        | ((array[offset + 1] & 0xff) << 16)
+        | ((array[offset + 2] & 0xff) << 8)
+        | (array[offset + 3] & 0xff);
   }
 
   public static void putLong(long value, byte[] array, int offset) {
@@ -86,10 +87,14 @@ public class ByteArrayUtil {
   }
 
   public static long getLong(byte[] array, int offset) {
-    return ((long) (array[offset] & 0xff) << 56) | ((long) (array[offset + 1] & 0xff) << 48)
-        | ((long) (array[offset + 2] & 0xff) << 40) | ((long) (array[offset + 3] & 0xff) << 32)
-        | ((long) (array[offset + 4] & 0xff) << 24) | ((long) (array[offset + 5] & 0xff) << 16)
-        | ((long) (array[offset + 6] & 0xff) << 8) | (array[offset + 7] & 0xff);
+    return ((long) (array[offset] & 0xff) << 56)
+        | ((long) (array[offset + 1] & 0xff) << 48)
+        | ((long) (array[offset + 2] & 0xff) << 40)
+        | ((long) (array[offset + 3] & 0xff) << 32)
+        | ((long) (array[offset + 4] & 0xff) << 24)
+        | ((long) (array[offset + 5] & 0xff) << 16)
+        | ((long) (array[offset + 6] & 0xff) << 8)
+        | (array[offset + 7] & 0xff);
   }
 
   /**
@@ -111,7 +116,8 @@ public class ByteArrayUtil {
     }
     toIndex = Math.min(toIndex, a.length);
 
-    for (int i = fromIndex; fromIndex < toIndex && result == -1 && i < toIndex; i++) {
+    for (int i = fromIndex; fromIndex < toIndex && result == -1
+        && i < toIndex; i++) {
       if (a[i] == key) {
         result = i;
       }
@@ -154,8 +160,7 @@ public class ByteArrayUtil {
 
     if (sublen == 0) {
       result = 0;
-    }
-    else if (sp == sublen) {
+    } else if (sp == sublen) {
       result = (first - 1);
     }
 
@@ -166,7 +171,8 @@ public class ByteArrayUtil {
    * Checks whether <tt>value</tt> matches <tt>pattern</tt> with respect to the bits specified by <tt>mask</tt>. In
    * other words: this method returns true if <tt>(value[i] ^ pattern[i]) &amp; mask[i] == 0</tt> for all i.
    */
-  public static boolean matchesPattern(byte[] value, byte[] mask, byte[] pattern) {
+  public static boolean matchesPattern(byte[] value, byte[] mask,
+      byte[] pattern) {
     for (int i = 0; i < value.length; i++) {
       if (((value[i] ^ pattern[i]) & mask[i]) != 0) {
         return false;
@@ -179,7 +185,8 @@ public class ByteArrayUtil {
   /**
    * Checks whether <tt>subValue</tt> matches the region in <tt>superValue</tt> starting at offset <tt>offset</tt>.
    */
-  public static boolean regionMatches(byte[] subValue, byte[] superValue, int offset) {
+  public static boolean regionMatches(byte[] subValue, byte[] superValue,
+      int offset) {
     for (int i = 0; i < subValue.length; i++) {
       if (subValue[i] != superValue[i + offset]) {
         return false;
@@ -200,10 +207,12 @@ public class ByteArrayUtil {
    * @return A negative number when the first region is smaller than the second, a positive number when the first region
    * is larger than the second, or 0 if the regions are equal.
    */
-  public static int compareRegion(byte[] array1, int startIdx1, byte[] array2, int startIdx2, int length) {
+  public static int compareRegion(byte[] array1, int startIdx1,
+      byte[] array2, int startIdx2, int length) {
     int result = 0;
     for (int i = 0; result == 0 && i < length; i++) {
-      result = (array1[startIdx1 + i] & 0xff) - (array2[startIdx2 + i] & 0xff);
+      result = (array1[startIdx1 + i] & 0xff)
+          - (array2[startIdx2 + i] & 0xff);
     }
     return result;
   }
