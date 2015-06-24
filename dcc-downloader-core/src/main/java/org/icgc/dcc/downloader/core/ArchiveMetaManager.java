@@ -42,15 +42,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.icgc.dcc.downloader.core.ArchiverConstant;
-import org.icgc.dcc.downloader.core.DataType;
-import org.icgc.dcc.downloader.core.SchemaUtil;
-import org.icgc.dcc.downloader.core.SizeInfo;
 import org.icgc.dcc.downloader.core.ArchiveJobManager.JobProgress;
 
 import com.google.common.collect.ImmutableList;
@@ -71,6 +68,7 @@ public class ArchiveMetaManager implements AutoCloseable {
 
   private final AtomicLong runningIncrement;
   private long runningTotalCount;
+  private long totalLine;
 
   private static final String META_TABLE_NAME_PROPERTY = "archive.meta.table.name";
 
@@ -83,7 +81,8 @@ public class ArchiveMetaManager implements AutoCloseable {
     metaTable.setAutoFlushTo(false);
     lookupMap = newHashMap();
     runningIncrement = new AtomicLong(0);
-    runningTotalCount = 0;
+    runningTotalCount = 0L;
+    totalLine = 0L;
     executor = Executors.newSingleThreadScheduledExecutor();
   }
 
@@ -95,7 +94,8 @@ public class ArchiveMetaManager implements AutoCloseable {
     metaTable.setAutoFlushTo(false);
     lookupMap = newHashMap();
     runningIncrement = new AtomicLong(0);
-    runningTotalCount = 0;
+    runningTotalCount = 0L;
+    totalLine = 0L;
     executor = Executors.newSingleThreadScheduledExecutor();
   }
 
@@ -119,7 +119,6 @@ public class ArchiveMetaManager implements AutoCloseable {
           "Please check with the integrity of the data for download id: "
               + downloadId);
     }
-    long totalLine = 0;
     Builder<Integer> filteredId = ImmutableList.builder();
     for (val kv : sizeInfoMap.entrySet()) {
       filteredId.add(Bytes.toInt(kv.getKey()));
@@ -128,19 +127,13 @@ public class ArchiveMetaManager implements AutoCloseable {
       totalLine = totalLine + sizeInfo.getTotalLine();
     }
 
-    Map<DataType, JobProgress> statsInfoMap = ImmutableMap.of(DataType
-        .valueOf(dataType.toUpperCase()),
-        new JobProgress(0L, totalLine));
-    Map<byte[], byte[]> encodedStatsInfoMap = SchemaUtil
-        .encodeStatsInfo(statsInfoMap);
     Put put = new Put(Bytes.toBytes(downloadId));
-    for (val entry : encodedStatsInfoMap.entrySet()) {
-      put.add(ARCHIVE_STATS_INFO_FAMILY, entry.getKey(), entry.getValue());
-    }
+    putStatistic(put, dataType, new JobProgress(0L, totalLine));
 
     Map<byte[], byte[]> clientInfo = SchemaUtil
         .encodeClientJobInfo(ImmutableMap.<String, String> of(
             ARCHIVE_TTL_COLUMN, String.valueOf(ttl)));
+
     for (val entry : clientInfo.entrySet()) {
       put.add(ARCHIVE_JOB_INFO_FAMILY, entry.getKey(), entry.getValue());
     }
@@ -149,6 +142,17 @@ public class ArchiveMetaManager implements AutoCloseable {
     archiveTable.flushCommits();
 
     return filteredId.build();
+  }
+
+  private void putStatistic(Put put, String dataType, JobProgress progress) {
+    Map<DataType, JobProgress> statsInfoMap = ImmutableMap.of(DataType
+        .valueOf(dataType.toUpperCase()),
+        progress);
+    Map<byte[], byte[]> encodedStatsInfoMap = SchemaUtil
+        .encodeStatsInfo(statsInfoMap);
+    for (val entry : encodedStatsInfoMap.entrySet()) {
+      put.add(ARCHIVE_STATS_INFO_FAMILY, entry.getKey(), entry.getValue());
+    }
   }
 
   public void keepMetaInfo(String dataType, int id, long totalLine,
@@ -216,7 +220,7 @@ public class ArchiveMetaManager implements AutoCloseable {
     try {
       archiveTable.incrementColumnValue(lookup(downloadId),
           ARCHIVE_STATS_INFO_FAMILY, lookup(dataType),
-          -runningTotalCount, false);
+          -runningTotalCount, Durability.SKIP_WAL);
 
     } catch (IOException e) {
       log.error("Fail to reset status");
@@ -225,6 +229,7 @@ public class ArchiveMetaManager implements AutoCloseable {
     }
   }
 
+  // problematic
   public long reportArchiveStatus(final String downloadId,
       final String dataType, final long incrementAmount)
       throws IOException {
@@ -241,7 +246,7 @@ public class ArchiveMetaManager implements AutoCloseable {
           try {
             archiveTable.incrementColumnValue(lookup(downloadId),
                 ARCHIVE_STATS_INFO_FAMILY, lookup(dataType),
-                increment, false);
+                increment, Durability.SKIP_WAL);
           } catch (IOException e) {
             // undo
             runningIncrement.addAndGet(increment);
@@ -254,6 +259,7 @@ public class ArchiveMetaManager implements AutoCloseable {
     return runningTotalCount;
   }
 
+  @Override
   public void close() {
     try {
       archiveTable.close();
@@ -293,16 +299,16 @@ public class ArchiveMetaManager implements AutoCloseable {
     for (val entry : jobInfo.entrySet()) {
       put.add(ARCHIVE_JOB_INFO_FAMILY, entry.getKey(), entry.getValue());
     }
+    putStatistic(put, dataType, new JobProgress(totalLine, totalLine));
     archiveTable.put(put);
 
     Map<byte[], byte[]> sizeInfo = SchemaUtil
         .encodeClientJobInfo(ImmutableMap.<String, String> of(
             ArchiverConstant.ARCHIVE_FILE_SIZE_COLUMN,
             String.valueOf(fileSize)));
-
     archiveTable.incrementColumnValue(lookup(downloadId),
         ARCHIVE_JOB_INFO_FAMILY, sizeInfo.keySet().iterator().next(),
-        fileSize, true);
+        fileSize, Durability.USE_DEFAULT);
 
   }
 
