@@ -6,6 +6,6 @@ Oozie workflows used by Downloader
 Build
 ---
 
-From the command line:
+In the repository's root execute from the command line:
 
-	mvn package
+        mvn -am -pl dcc-downloader-workflows package
