@@ -42,9 +42,9 @@ import org.apache.oozie.client.WorkflowJob.Status;
 public class ArchiveJobSubmitter {
 
   public static final String DEFAULT_OOZIE_URL = "http://localhost:11000/oozie";
-  public static final String DEFAULT_SUPPORT_EMAIL_ADDRESS = "***REMOVED***";
+  public static final String DEFAULT_SUPPORT_EMAIL_ADDRESS = "nobody@example.com";
   public static final String DEFAULT_APP_PATH =
-      "hdfs://***REMOVED***:8020/user/downloader/workflows/archive-main";
+      "hdfs://localhost:8020/user/downloader/workflows/archive-main";
 
   private final String supportEmailAddress;
   private final String oozieUrl;
@@ -108,20 +108,12 @@ public class ArchiveJobSubmitter {
     private final List<SelectionEntry<DataType, String>> filterTypeInfo;
   }
 
-  /**
-   * @param oozieId
-   * @return
-   * @throws OozieClientException
-   */
   public Status getStatus(String oozieId) throws OozieClientException {
     OozieClient cli = new OozieClient(oozieUrl);
     WorkflowJob jobInfo = cli.getJobInfo(oozieId);
     return jobInfo.getStatus();
   }
 
-  /**
-   * @return
-   */
   public String getOozieUrl() {
     return oozieUrl;
   }

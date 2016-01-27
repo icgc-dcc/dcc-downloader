@@ -27,8 +27,8 @@ import os
 import os.path
 import sys, getopt
 
-# downloadEndPointUrl = 'http://***REMOVED***:8888/api/download/'
-downloadEndPointUrl = 'http://***REMOVED***:8888/api/v1/download/'
+# downloadEndPointUrl = 'http://localhost:8888/api/download/'
+downloadEndPointUrl = 'http://<proxy_host>:8888/api/v1/download/'
 validationRootDir = '/tmp/dd-validation/'
 
 # Donor Id field position

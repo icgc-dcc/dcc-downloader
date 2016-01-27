@@ -66,7 +66,7 @@ public class DownloaderBenchmark {
     @SneakyThrows
     @Override
     protected void setUp() {
-      String downloadDir = "hdfs://***REMOVED***:8020/icgc/download/dynamic/dev";
+      String downloadDir = "hdfs://localhost:8020/icgc/download/dynamic/dev";
       this.downloadPath = new Path(downloadDir);
       downloader =
           new DownloaderClient(downloadDir, "localhost", ArchiveJobSubmitter.DEFAULT_OOZIE_URL,

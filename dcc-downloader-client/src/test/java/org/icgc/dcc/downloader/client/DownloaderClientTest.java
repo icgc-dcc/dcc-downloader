@@ -105,7 +105,7 @@ public class DownloaderClientTest {
 	public void testGetSizeWithValidDonorId() throws InterruptedException,
 			ExecutionException, IOException {
 		DownloaderClient dl = new DownloaderClient("/tmp/download/dynamic",
-				conf, null, null, "***REMOVED***");
+				conf, null, null, "nobody@example.com");
 		for (Integer donorId : donorIds) {
 			long actualSize = dl
 					.getSizes(
@@ -128,7 +128,7 @@ public class DownloaderClientTest {
 	public void testGetSizeWithNoInfoType() throws InterruptedException,
 			ExecutionException, IOException {
 		DownloaderClient dl = new DownloaderClient("/tmp/download/dynamic",
-				conf, null, null, "***REMOVED***");
+				conf, null, null, "nobody@example.com");
 		for (Integer donorId : donorIds) {
 			long actualSize = dl
 					.getSizes(
@@ -143,7 +143,7 @@ public class DownloaderClientTest {
 	public void testGetSizeWithInvalidDonorId() throws InterruptedException,
 			ExecutionException, IOException {
 		DownloaderClient dl = new DownloaderClient("/tmp/download/dynamic",
-				conf, null, null, "***REMOVED***");
+				conf, null, null, "nobody@example.com");
 		long actualSize = dl
 				.getSizes(ImmutableSet.<String> of("DOES_NOT_EXIST"))
 				.get(DataType.SSM_OPEN).get();
@@ -164,7 +164,7 @@ public class DownloaderClientTest {
 		String oozieId = "OOZIE_ID";
 		String expectedRootOutputDir = "/tmp/download/dynamic";
 		String expectedUrl = "TEST_URL";
-		String expectedEmailAddress = "***REMOVED***";
+		String expectedEmailAddress = "nobody@example.com";
 		Set<String> expectedDonorIds = ImmutableSet.of("DO1");
 		ArchiveJobSubmitter submitter = mock(ArchiveJobSubmitter.class);
 		when(submitter.submit(any(ArchiveJobContext.class)))

@@ -19,11 +19,11 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 <configuration>
     <property>
         <name>jobTracker</name>
-        <value>***REMOVED***:8021</value>
+        <value>localhost:8021</value>
     </property>
     <property>
         <name>nameNode</name>
-        <value>hdfs://***REMOVED***:8020</value>
+        <value>hdfs://localhost:8020</value>
     </property>
     <property>
         <name>queueName</name>
@@ -31,7 +31,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
     </property>
     <property>
         <name>zookeeperQuorum</name>
-        <value>***REMOVED***</value>
+        <value>localhost</value>
     </property>
     <property>
         <name>bufferSize</name>
