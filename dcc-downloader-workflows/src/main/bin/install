@@ -65,7 +65,7 @@ libdir="$basedir/lib"
 
 # Maven artifact location
 name="dcc-downloader"
-server="http://seqwaremaven.oicr.on.ca/artifactory"
+server="https://artifacts.oicr.on.ca/artifactory"
 artifact="org/icgc/dcc/$name"
 
 if [[ -n $release ]]
